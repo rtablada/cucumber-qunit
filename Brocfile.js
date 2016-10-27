@@ -11,6 +11,7 @@ const Babel = require('broccoli-babel-transpiler');
 const mv = require('broccoli-stew').mv;
 const rm = require('broccoli-stew').rm;
 const browserify = require('broccoli-browserify-cache');
+const globify = require('require-globify');
 
 let pubFiles = new LiveReload('public');
 
@@ -29,6 +30,13 @@ const babelScript = new Babel(appNoSass);
 const appScript = browserify(babelScript, {
   entries: ['./index'],
   outputFile: 'app.js',
+
+  config(brow) {
+    const cucumberify = require('./cucumberify');
+
+    brow.transform(cucumberify);
+    // brow.transform(globify);
+  },
 });
 
 const compiledSass = new Sass(stylePaths, 'app.scss', 'app.css', {});
@@ -44,6 +52,12 @@ if (process.env.EMBER_ENV === 'test') {
   const testJs = browserify(testTree, {
     entries: ['./tests/index-test'],
     outputFile: 'tests.js',
+    config(brow) {
+      const cucumberify = require('./cucumberify');
+
+      brow.transform(cucumberify);
+      // brow.transform(globify);
+    },
   });
 
   module.exports = new Merge([pubFiles, styles, appScript, testJs]);
